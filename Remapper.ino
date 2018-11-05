@@ -292,11 +292,39 @@ KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   Keyboard.release(k);
 }
 
-USB Usb;
-// USBHub     Hub(&Usb);
-HIDBoot<USB_HID_PROTOCOL_KEYBOARD> HidKeyboard(&Usb);
+class MouseRptParser : public MouseReportParser
+{
+ protected:
+  void OnMouseMove(MOUSEINFO *mi);
+  void OnLeftButtonUp(MOUSEINFO *mi);
+  void OnLeftButtonDown(MOUSEINFO *mi);
+  void OnRightButtonUp(MOUSEINFO *mi);
+  void OnRightButtonDown(MOUSEINFO *mi);
+  void OnMiddleButtonUp(MOUSEINFO *mi);
+  void OnMiddleButtonDown(MOUSEINFO *mi);
+};
 
-KbdRptParser Prs;
+void
+MouseRptParser::OnMouseMove(MOUSEINFO *mi)
+{
+  Mouse.move(mi->dX * 2, mi->dY * 2, 0);
+};
+
+#define pressOrReleaseMouse(method, key)                                  \
+  void MouseRptParser::method##Up(MOUSEINFO *mi) { Mouse.release(key); }; \
+  void MouseRptParser::method##Down(MOUSEINFO *mi) { Mouse.press(key); };
+
+pressOrReleaseMouse(OnLeftButton, MOUSE_LEFT);
+pressOrReleaseMouse(OnRightButton, MOUSE_RIGHT);
+pressOrReleaseMouse(OnMiddleButton, MOUSE_MIDDLE);
+
+USB Usb;
+HIDBoot<USB_HID_PROTOCOL_KEYBOARD | USB_HID_PROTOCOL_MOUSE> HidComposite(&Usb);
+HIDBoot<USB_HID_PROTOCOL_KEYBOARD> HidKeyboard(&Usb);
+HIDBoot<USB_HID_PROTOCOL_MOUSE> HidMouse(&Usb);
+
+KbdRptParser KbdPrs;
+MouseRptParser MousePrs;
 
 void
 setup()
@@ -307,7 +335,10 @@ setup()
 
   delay(200);
 
-  HidKeyboard.SetReportParser(0, &Prs);
+  HidComposite.SetReportParser(0, &KbdPrs);
+  HidComposite.SetReportParser(1, &MousePrs);
+  HidKeyboard.SetReportParser(0, &KbdPrs);
+  HidMouse.SetReportParser(0, &MousePrs);
 }
 
 void
