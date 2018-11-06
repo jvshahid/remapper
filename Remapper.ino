@@ -59,7 +59,7 @@ static const uint8_t keys[0xE8] PROGMEM = {
     0x00,            /* 0x32	Keyboard Non - US # and~ */
     ';',             /* 0x33	Keyboard ; and : */
     '\'',            /* 0x34	Keyboard ' and " */
-    0x00,            /* 0x35	Keyboard Grave Accent and Tilde */
+    '`',             /* 0x35	Keyboard Grave Accent and Tilde */
     ',',             /* 0x36	Keyboard , and < */
     '.',             /* 0x37	Keyboard . and > */
     '/',             /* 0x38	Keyboard / and ? */
