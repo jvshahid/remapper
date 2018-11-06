@@ -305,10 +305,12 @@ class MouseRptParser : public MouseReportParser
   void OnMiddleButtonDown(MOUSEINFO *mi);
 };
 
+const uint8_t mouse_movement_scale = 3;
+
 void
 MouseRptParser::OnMouseMove(MOUSEINFO *mi)
 {
-  Mouse.move(mi->dX * 2, mi->dY * 2, 0);
+  Mouse.move(mi->dX * mouse_movement_scale, mi->dY * mouse_movement_scale);
 };
 
 #define pressOrReleaseMouse(method, key)                                  \
