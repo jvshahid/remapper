@@ -239,7 +239,7 @@ static const uint8_t keys[0xE8] PROGMEM = {
     KEY_RIGHT_ALT,   /* 0xE5	Keyboard RightShift (swapped with right alt) */
     KEY_RIGHT_CTRL,  /* 0xE6	Keyboard RightAlt (swapped with right
                         control)*/
-    KEY_RIGHT_SHIFT, /* 0xE7	Keyboard Right GUI (swapped with right shift)*/
+    KEY_RIGHT_GUI,   /* 0xE7	Keyboard Right GUI */
 };
 
 class KbdRptParser : public KeyboardReportParser
