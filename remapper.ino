@@ -234,7 +234,8 @@ static const uint8_t keys[0xE8] PROGMEM = {
     KEY_LEFT_ALT,    /* 0xE1	Keyboard LeftShift (swapped with left alt)*/
     KEY_LEFT_CTRL,   /* 0xE2	Keyboard LeftAlt (swapped with left control) */
     KEY_LEFT_GUI,    /* 0xE3	Keyboard Left GUI */
-    KEY_RIGHT_SHIFT, /* 0xE4	Keyboard RightControl (swapped with right shift)
+    KEY_RIGHT_SHIFT, /* 0xE4	Keyboard RightControl (swapped with right
+                      * shift)
                       */
     KEY_RIGHT_ALT,   /* 0xE5	Keyboard RightShift (swapped with right alt) */
     KEY_RIGHT_CTRL,  /* 0xE6	Keyboard RightAlt (swapped with right
