@@ -19,10 +19,10 @@ list:
 	arduino-cli board list
 	arduino-cli core list
 
-Remapper.arduino.avr.leonardo.hex: Remapper.ino
+remapper.arduino.avr.leonardo.hex: remapper.ino
 	arduino-cli compile --fqbn arduino:avr:leonardo
 
-compile: Remapper.arduino.avr.leonardo.hex
+compile: remapper.arduino.avr.leonardo.hex
 
-install: Remapper.arduino.avr.leonardo.hex
+install: remapper.arduino.avr.leonardo.hex
 	sudo `which arduino-cli` upload -p /dev/ttyACM0 --fqbn arduino:avr:leonardo
