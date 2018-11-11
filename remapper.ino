@@ -296,7 +296,14 @@ KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 
 class MouseRptParser : public MouseReportParser
 {
+  /* prevent button events from being fired if scrolling took place */
+  enum {
+    UNDECIDED,
+    SCROLLING,
+  } middle_button_state;
+
  protected:
+  void Parse(USBHID *hid, bool is_rpt_id, uint8_t len, uint8_t *buf);
   void OnMouseMove(MOUSEINFO *mi);
   void OnLeftButtonUp(MOUSEINFO *mi);
   void OnLeftButtonDown(MOUSEINFO *mi);
@@ -309,10 +316,26 @@ class MouseRptParser : public MouseReportParser
 const uint8_t mouse_movement_scale = 3;
 
 void
+MouseRptParser::Parse(USBHID *hid, bool is_rpt_id, uint8_t len, uint8_t *buf)
+{
+  // buf[0] is report_id
+  // buf[1] is buttons
+  // buf[2] is x
+  // buf[3] is y
+  // buf[4] is vertical wheel
+  if (buf[4] > 0) {
+    Mouse.move(0, 0, buf[4] * mouse_movement_scale);
+    this->middle_button_state = SCROLLING;
+  }
+
+  MouseReportParser::Parse(hid, is_rpt_id, len - 1, buf + 1);
+}
+
+void
 MouseRptParser::OnMouseMove(MOUSEINFO *mi)
 {
-  Mouse.move(mi->dX * mouse_movement_scale, mi->dY * mouse_movement_scale);
-};
+  Mouse.move(mi->dX * mouse_movement_scale, mi->dY * mouse_movement_scale, 0);
+}
 
 #define pressOrReleaseMouse(method, key)                                  \
   void MouseRptParser::method##Up(MOUSEINFO *mi) { Mouse.release(key); }; \
@@ -320,14 +343,37 @@ MouseRptParser::OnMouseMove(MOUSEINFO *mi)
 
 pressOrReleaseMouse(OnLeftButton, MOUSE_LEFT);
 pressOrReleaseMouse(OnRightButton, MOUSE_RIGHT);
-pressOrReleaseMouse(OnMiddleButton, MOUSE_MIDDLE);
 
+void
+MouseRptParser::OnMiddleButtonUp(MOUSEINFO *mi)
+{
+  if (this->middle_button_state == SCROLLING) {
+    return;
+  }
+
+  Mouse.press(MOUSE_MIDDLE);
+  Mouse.release(MOUSE_MIDDLE);
+}
+
+void
+MouseRptParser::OnMiddleButtonDown(MOUSEINFO *mi)
+{
+  this->middle_button_state = UNDECIDED;
+}
+
+/* pass true in the second argument to disable usage of boot protocol.  See
+   https://www.usb.org/sites/default/files/documents/hid1_11.pdf for more
+   information on the spec and HID boot protocol.  Note: the code assumes a
+   report description that matches the lenovo keyboards.  It may not work with
+   different mice or keyboards */
 USB Usb;
-HIDBoot<USB_HID_PROTOCOL_KEYBOARD | USB_HID_PROTOCOL_MOUSE> HidComposite(&Usb);
-HIDBoot<USB_HID_PROTOCOL_KEYBOARD> HidKeyboard(&Usb);
-HIDBoot<USB_HID_PROTOCOL_MOUSE> HidMouse(&Usb);
+HIDBoot<USB_HID_PROTOCOL_KEYBOARD | USB_HID_PROTOCOL_MOUSE> HidComposite(&Usb,
+                                                                         true);
+HIDBoot<USB_HID_PROTOCOL_KEYBOARD> HidKeyboard(&Usb, true);
+HIDBoot<USB_HID_PROTOCOL_MOUSE> HidMouse(&Usb, true);
 
 KbdRptParser KbdPrs;
+
 MouseRptParser MousePrs;
 
 void
